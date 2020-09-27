@@ -51,6 +51,7 @@ const Maze = {
             this._createMatrix()
             //initialization of Recursive Backtracker algorithm for creating a maze
             this._createMaze(this.elements.matrix,1,1);
+            Player.init()
         });
 
         //first initialization of a grid ==> by default on easy difficulty
@@ -100,7 +101,7 @@ const Maze = {
         // creates a matrix of dimensions (Difficulty+2)X(Difficulty+2)
         /*
             11111
-            10001  a 5X5 matrix looks like this
+            10001  a 4X4 matrix looks like this
             10001  the borders are filled with 1's because we constrict the movement of the Recursive Algorithm
             10001  to the areas only filled with 0's 
             11111
@@ -175,6 +176,6 @@ const Maze = {
 window.addEventListener("DOMContentLoaded",function(){
     //Initialize a maze
     Maze.init()
-    
+    Player.init()
 
 })
