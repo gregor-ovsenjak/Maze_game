@@ -1,10 +1,11 @@
 
 
-function Snake(x,y){
-
+function Snake_Head(x,y){
+    this.prev_x = x;
+    this.prev_y = y;
     this.x = x;
     this.y = y;
-    this.length = [];
+    this.length = [new Snake_part()];
     this.direction = [false,false,false,false];
     this.movement = [-8,-8,+8,+8];
     this.update = function() {
@@ -14,14 +15,18 @@ function Snake(x,y){
 
                 
                 if (index == 0) {
+                    this.prev_y =  this.y;
                     this.x += this.movement[index]
                 } else if (index == 2){
+                    this.prev_y =  this.y;
                     this.x += this.movement[index]
                 }
 
                 if (index == 1) {
+                    this.prev_x =  this.x;
                     this.y += this.movement[index]
                 } else if (index == 3){
+                    this.prev_x =  this.x;
                     this.y += this.movement[index]
                 }
 
@@ -33,20 +38,24 @@ function Snake(x,y){
     }
     
     this.update_length = function(x,y,i) {
-        if (snake.length.length > 0){
+        /*
+            recursive function that passes down x,y positions of the current snake part
+            to the next snake part. When it reaches the last snake part it returns null
 
+        */ 
+        if (snake.length.length > 0){
+            // x,y of this snake part are passed down to next snake_part
             X = snake.length[i].x;
             Y = snake.length[i].y;
 
-
+            // x,y of previous snake part are the next x,y of this snake part
             snake.length[i].x = x;
             snake.length[i].y = y;
+            // draw the snake parts
             snake.length[i].update();
-            
             
 
             if (i == (snake.length.length -1)){
-                
                 return null;
             }else {
                 i +=1;
@@ -55,6 +64,27 @@ function Snake(x,y){
             }
 
             return null;
+        }
+    }
+
+    this.check_if_collided = function() {
+        for (var i = 1; i< snake.length.length; i++){
+
+            if (snake.length[i].x == snake.x && snake.length[i].y == snake.y){
+                console.log("Same");
+                noLoop();
+                setTimeout(function(){
+                    snake.length = [new Snake_part()];
+                
+                snake.x = random(0,height);
+                snake.y = random(0,height);
+                snake.direction = [false,false,false,false]
+                
+                loop();
+                },3000)
+                
+            
+            }
         }
     }
 }
@@ -92,19 +122,19 @@ function Snake_part(){
 }
 
 
+
 function setup() {
-    createCanvas(400, 400);
+    Canvas =  createCanvas(400, 400);
     const height = document.querySelector('canvas').height - 5
-    frameRate(23)
+    frameRate(24);
     x_first = random(0,height);
     y_first = random(0,height);
 
-    snake = new Snake(x_first,y_first)
+    snake = new Snake_Head(x_first,y_first);
 
-    Apple.x = random(0,height);
-    Apple.y = random(0,height);
+    Apple.x = random(0,height); // random x
+    Apple.y = random(0,height); // random y 
 
-    Apple.on_the_canvas = true;
     
 
 }
@@ -112,24 +142,35 @@ function setup() {
 
 function draw() {
     background(0);
-    keyPressed();
-    snake.update();
-    snake.update_length(snake.x,snake.y,0)
     
+    if (snake.x == snake.prev_x && snake.length.length > 1){
+        keyPressed_X();
+    } else  if (snake.y == snake.prev_y && snake.length.length > 1){
+        keyPressed_Y();
+    }  
+
+    if (snake.length.length < 2){
+        keyPressed_X();
+        keyPressed_Y();
+    }
+    
+    snake.update(); // updates the position of snake_head
+    snake.update_length(snake.x,snake.y,0)// updates the positions of snake_parts
+    snake.check_if_collided()
+
     if((Math.abs(snake.x -Apple.x) < 7) && ((Math.abs(snake.y -Apple.y) <7))){
 
-        Apple.on_the_canvas = false;
         Apple.x = random(0,height);
         Apple.y = random(0,height);
-        Apple.on_the_canvas = true;
+
         snake.length.push(new Snake_part())
-    }
+    }// if apple and snake are less than 7 px apart 
+     //1. move the apple to another random position
+     //2. increase snake length
 
-
-    if (Apple.on_the_canvas){
-        Apple.update();
-    }
-
+     Apple.update();
+    
+    
 
 }
 
@@ -143,25 +184,32 @@ function FalseDirection(){
 }
 
 
-function keyPressed() {
-    if (keyIsDown(37)){
-        FalseDirection()
-        snake.direction[0] = true;
+function keyPressed_X() {
+        if (keyIsDown(37) && !keyIsDown(38) && !keyIsDown(40)){
+            FalseDirection()
+            
+            snake.direction[0] = true;// move LEFT
 
-    }
+        }else if(keyIsDown(39) && !keyIsDown(38) && !keyIsDown(40)){
+            FalseDirection()
+            
+            snake.direction[2] = true;// move RIGHT
+        }
 
-    if(keyIsDown(38)){
-        FalseDirection()
-        snake.direction[1] = true;
-    }
-
-    if(keyIsDown(39)){
-        FalseDirection()
-        snake.direction[2] = true;
-    }
-
-    if(keyIsDown(40)){
-        FalseDirection()
-        snake.direction[3] = true;
-    }
 }
+
+
+function keyPressed_Y() {
+    
+        if(keyIsDown(38) && !keyIsDown(37) && !keyIsDown(39)){
+            FalseDirection()
+            
+            snake.direction[1] = true;// move UP
+        }else if(keyIsDown(40) && !keyIsDown(37) && !keyIsDown(39)){
+            FalseDirection()
+
+            snake.direction[3] = true;// move DOWN
+        }
+}
+
+
